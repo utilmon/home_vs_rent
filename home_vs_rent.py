@@ -54,12 +54,14 @@ def rent_vs_buy_calculator(
             if remaining_mortgage > 0:
                 interest_payment = remaining_mortgage * (mortgage_rate / 12)
                 principal_payment = monthly_mortgage - interest_payment
+                if principal_payment > remaining_mortgage:
+                    principal_payment = remaining_mortgage
                 annual_interest += interest_payment
                 annual_principal += principal_payment
                 remaining_mortgage -= principal_payment
         
         # Total cost out of pocket for the buyer this year
-        annual_buy_cash_out = (monthly_mortgage * 12) + annual_property_tax + annual_maintenance
+        annual_buy_cash_out = annual_interest + annual_principal + annual_property_tax + annual_maintenance
         total_buy_sunk_costs += annual_property_tax + annual_maintenance + annual_interest
         
         # Home appreciates
@@ -74,7 +76,7 @@ def rent_vs_buy_calculator(
         annual_cash_flow_difference = annual_buy_cash_out - annual_rent
         
         # Portfolio grows by the investment return rate, plus the cash flow difference added evenly (approximated at year end)
-        rent_investment_portfolio = (rent_investment_portfolio * (1 + investment_return_rate)) + annual_cash_flow_difference
+        rent_investment_portfolio = (rent_investment_portfolio * (1 + investment_return_rate)) + (annual_cash_flow_difference * (1 + (investment_return_rate / 2)))
         
         # Rent increases for next year
         current_rent *= (1 + rent_inflation_rate)
