@@ -47,9 +47,14 @@ def rent_vs_buy_calculator(
         annual_property_tax = current_home_value * property_tax_rate
         annual_maintenance = current_home_value * maintenance_rate
         
-        # Calculate interest vs principal for the year
+        # Calculate interest vs principal and monthly cash flow for the year
         annual_interest = 0
         annual_principal = 0
+        annual_buy_cash_out = 0
+        monthly_property_tax = annual_property_tax / 12
+        monthly_maintenance = annual_maintenance / 12
+        monthly_investment_rate = investment_return_rate / 12
+
         for _ in range(12):
             if remaining_mortgage > 0:
                 interest_payment = remaining_mortgage * (mortgage_rate / 12)
@@ -59,25 +64,23 @@ def rent_vs_buy_calculator(
                 annual_interest += interest_payment
                 annual_principal += principal_payment
                 remaining_mortgage -= principal_payment
-        
-        # Total cost out of pocket for the buyer this year
-        annual_buy_cash_out = annual_interest + annual_principal + annual_property_tax + annual_maintenance
+            else:
+                interest_payment = 0
+                principal_payment = 0
+
+            monthly_buy_cash_out = interest_payment + principal_payment + monthly_property_tax + monthly_maintenance
+            annual_buy_cash_out += monthly_buy_cash_out
+
+            monthly_rent_payment = current_rent
+            total_rent_paid += monthly_rent_payment
+            monthly_cash_flow_difference = monthly_buy_cash_out - monthly_rent_payment
+            rent_investment_portfolio = (rent_investment_portfolio * (1 + monthly_investment_rate)) + monthly_cash_flow_difference
+
         total_buy_sunk_costs += annual_property_tax + annual_maintenance + annual_interest
-        
+
         # Home appreciates
         current_home_value *= (1 + home_appreciation_rate)
 
-        # -- RENTING MATH --
-        annual_rent = current_rent * 12
-        total_rent_paid += annual_rent
-        
-        # The renter invests the difference in monthly cash flow
-        # If buying costs $3000/mo and rent is $2000/mo, the renter invests the $1000/mo difference.
-        annual_cash_flow_difference = annual_buy_cash_out - annual_rent
-        
-        # Portfolio grows by the investment return rate, plus the cash flow difference added evenly (approximated at year end)
-        rent_investment_portfolio = (rent_investment_portfolio * (1 + investment_return_rate)) + (annual_cash_flow_difference * (1 + (investment_return_rate / 2)))
-        
         # Rent increases for next year
         current_rent *= (1 + rent_inflation_rate)
 
